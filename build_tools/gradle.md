@@ -28,25 +28,29 @@ class AddEnsimePlugin  implements Plugin<Gradle> {
     def added = false
 
     gradle.allprojects { project ->
-      project.with { 
+      project.with {
         if (parent == null) {
+
           buildscript { 
-            repositories {
+	    repositories {
+	      mavenLocal()
+	      mavenCentral()
+
               jcenter()
-              maven {
-                name 'JFrog OSS Snapshot Repository'
-                url 'http://oss.jfrog.org/oss-snapshot-local'
-              }
             }
+	    //if using snapshot, change rootProject.ensime.serverVersion to a snapshot
+	    //update this property to the lated ensime-gradle version
             dependencies {
-              classpath 'net.coacoas.gradle:ensime-gradle:0.3.0-SNAPSHOT'
-            }
+	      classpath 'net.coacoas.gradle:ensime-gradle:0.3.0-SNAPSHOT'
+	    }
           }
         }
 
         plugins.whenPluginAdded { plugin ->
           if (!added && supportedPlugins.contains(plugin.class.name)) { 
             rootProject.apply plugin: 'org.ensime.gradle'
+	    //update the server version to the latest supported by the ensime-gradle plugin
+	    rootProject.ensime.serverVersion = "2.0.0-SNAPSHOT"
             added = true
           }
         }
@@ -111,8 +115,11 @@ Example:
 
 ```groovy
 ensime {
-  scalaVersion   '2.11.8'
+  scalaVersion   '2.11'
   cacheDir       file('.ensime.cache.d')
+
+  serverVersion  '2.0.0-SNAPSHOT'
+  serverJarsDir  'build/ensime'
 
   javaFlags      '-Xlint', '-wahoowa'
   compilerArgs   '-Xlint'
